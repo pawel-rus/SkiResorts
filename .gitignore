@@ -4,4 +4,4 @@ bin/
 .settings/
 .classpath
 .project
-resources/*.log
+logs/
