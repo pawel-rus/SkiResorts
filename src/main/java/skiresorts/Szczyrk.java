@@ -15,7 +15,7 @@ public class Szczyrk {
 	
 	Szczyrk(){
 		initFrame();
-		
+		initLogoPanel();
 		frame.setVisible(true);
 	}
 	
@@ -24,5 +24,9 @@ public class Szczyrk {
 		frame.getContentPane().setBackground(new Color(255,255,204));
 		frame.setLayout(new BorderLayout());
 		frame.setLocationRelativeTo(null);
+	}
+	
+	void  initLogoPanel() {
+		
 	}
 }
