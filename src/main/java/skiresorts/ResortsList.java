@@ -36,6 +36,7 @@ public class ResortsList implements ActionListener {
 		mainFrame.pack();
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setVisible(true);
+		logger.info("ResortsList initialized.");
 	}
 	
 	private void initFrame() {
@@ -94,8 +95,8 @@ public class ResortsList implements ActionListener {
 				new Szczyrk();
 				break;
 			case 1:
-				new Kotelnica();
 				logger.info("Opening Kotelnica Details.");
+				new Kotelnica();
 				break;
 			case 2:
 				break;
