@@ -37,6 +37,7 @@ public class ResortsList implements ActionListener {
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setVisible(true);
 		logger.info("ResortsList initialized.");
+		new InternetConnectionChecker();
 	}
 	
 	private void initFrame() {
