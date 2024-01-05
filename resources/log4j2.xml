@@ -43,6 +43,15 @@
     		</Policies>
 		</RollingFile>
 		
+		<RollingFile name="ConnectionLog"
+			fileName="${APP_LOG_ROOT}/InternetConnectionChecker/app.log"
+			filePattern="${APP_LOG_ROOT}/InternetConnectionChecker/app-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="${LOG_PATTERN}"/>
+			<Policies>
+        		<SizeBasedTriggeringPolicy size="100 MB"/>
+    		</Policies>
+		</RollingFile>
+		
 		<!-- File Appender for each log level -->
 		<RollingFile name="FatalLog" 
 			fileName="${APP_LOG_ROOT}/fatal/app.log"
@@ -136,6 +145,14 @@
 			<AppenderRef ref="WarnLog" />
 			<AppenderRef ref="ErrorLog" />
 			<AppenderRef ref="FatalLog" />
+			<AppenderRef ref="Console" />
+		</Logger>
+		
+		<Logger name="main.java.skiresorts.InternetConnectionChecker" level="trace" additivity="false">
+			<AppenderRef ref="ConnectionLog" />
+			<AppenderRef ref="InfoLog" />
+			<AppenderRef ref="WarnLog" />
+			<AppenderRef ref="ErrorLog" />
 			<AppenderRef ref="Console" />
 		</Logger>
 		
