@@ -21,7 +21,7 @@
 			filePattern="${APP_LOG_ROOT}/ResortsList/app-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="${LOG_PATTERN}"/>
 			<Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
 		</RollingFile>
 		
@@ -30,7 +30,7 @@
 			filePattern="${APP_LOG_ROOT}/Kotelnica/app-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="${LOG_PATTERN}"/>
 			<Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
 		</RollingFile>
 		
@@ -39,7 +39,7 @@
 			filePattern="${APP_LOG_ROOT}/Szczyrk/app-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="${LOG_PATTERN}"/>
 			<Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
 		</RollingFile>
 		
@@ -48,7 +48,7 @@
 			filePattern="${APP_LOG_ROOT}/InternetConnectionChecker/app-%d{yyyy-MM-dd}-%i.log">
 			<PatternLayout pattern="${LOG_PATTERN}"/>
 			<Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
 		</RollingFile>
 		
@@ -59,7 +59,7 @@
             <LevelRangeFilter minLevel="FATAL" maxLevel="FATAL" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_LVL_PATTERN}"/>
             <Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
         </RollingFile>
 		
@@ -69,7 +69,7 @@
             <LevelRangeFilter minLevel="ERROR" maxLevel="ERROR" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_LVL_PATTERN}"/>
             <Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
         </RollingFile>
 
@@ -79,7 +79,7 @@
             <LevelRangeFilter minLevel="WARN" maxLevel="WARN" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_LVL_PATTERN}"/>
             <Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
         </RollingFile>
         
@@ -89,7 +89,7 @@
             <LevelRangeFilter minLevel="INFO" maxLevel="INFO" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_LVL_PATTERN}"/>
             <Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
         </RollingFile>
 		
@@ -99,7 +99,7 @@
             <LevelRangeFilter minLevel="DEBUG" maxLevel="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_LVL_PATTERN}"/>
             <Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
         </RollingFile>
         
@@ -109,7 +109,7 @@
             <LevelRangeFilter minLevel="TRACE" maxLevel="TRACE" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_LVL_PATTERN}"/>
             <Policies>
-        		<SizeBasedTriggeringPolicy size="100 MB"/>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
     		</Policies>
         </RollingFile>
 	
@@ -148,7 +148,7 @@
 			<AppenderRef ref="Console" />
 		</Logger>
 		
-		<Logger name="main.java.skiresorts.InternetConnectionChecker" level="trace" additivity="false">
+		<Logger name="main.java.skiresorts.InternetConnectionChecker" level="info" additivity="false">
 			<AppenderRef ref="ConnectionLog" />
 			<AppenderRef ref="InfoLog" />
 			<AppenderRef ref="WarnLog" />
