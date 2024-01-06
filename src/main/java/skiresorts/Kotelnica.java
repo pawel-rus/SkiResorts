@@ -2,7 +2,13 @@ package main.java.skiresorts;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.PiePlot;
+import org.jfree.chart.plot.PlotOrientation;
+import org.jfree.data.category.DefaultCategoryDataset;
+import org.jfree.data.general.DefaultPieDataset;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,6 +16,8 @@ import org.jsoup.select.Elements;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
@@ -17,12 +25,20 @@ import java.awt.GridLayout;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableColumn;
+import javax.swing.table.TableColumnModel;
 
 
 public class Kotelnica {
@@ -34,10 +50,12 @@ public class Kotelnica {
 	private JFrame frame = new JFrame("Kotelnica Białczańska");
 	private JPanel logoPanel  = new JPanel();
 	private JPanel mainPanel  = new JPanel();
+	private JPanel bottomPanel = new JPanel();
+	private JTable rightTable;
 	
-	private HashMap<String, String> weatherDataMap = new HashMap<>();
+	private HashMap<String, String> weatherDataMap = new LinkedHashMap<>();
 	List<String[]> skiRunsArrayList = new ArrayList<>();
-	//List<String> headings = new ArrayList<>();
+	
 	List<String> skiRunsList = new ArrayList<>();
 	List<String> difficultyLevel = new ArrayList<>();
 	List<String> isActive = new ArrayList<>();
@@ -50,6 +68,7 @@ public class Kotelnica {
 		initFrame();
 		initLogoPanel();
 		initMainPanel();
+		initBottomPanel();
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
@@ -69,43 +88,65 @@ public class Kotelnica {
 		webScrapper();
 		
 		mainPanel.setLayout(new BorderLayout());
+		mainPanel.setBackground(new Color(255,255,255));
 		JPanel leftColumn = new JPanel(new GridLayout(weatherDataMap.size() + 1, 2));
-		JPanel rightColumn = new JPanel(new GridLayout(skiRunsArrayList.size() + 1,skiRunsArrayList.get(0).length));
+		leftColumn.setBackground(new Color(255,255,255));
+		//JPanel rightColumn = new JPanel(new GridLayout(skiRunsArrayList.size() + 1,skiRunsArrayList.get(0).length));
 		
 		leftColumn.add(new JLabel("WARUNKI POGODOWE"));
 	    leftColumn.add(new JLabel(""));
+	    
 		for(String condition : weatherDataMap.keySet()) {
 			String value = weatherDataMap.get(condition);
 			
 			JLabel conditionLabel = new JLabel(condition);
 			JLabel valueLabel = new JLabel(value);
-			
+			conditionLabel.setBackground(new Color(255,255,255));
+			valueLabel.setBackground(new Color(255,255,255));
 			leftColumn.add(conditionLabel);
 			leftColumn.add(valueLabel);
 		}
 		
-		rightColumn.add(new JLabel("TRASA"));
-	    rightColumn.add(new JLabel("TRUDNOŚĆ"));
-	    rightColumn.add(new JLabel("CZYNNA"));
-	    rightColumn.add(new JLabel("POKRYWA ŚNIEŻNA   "));
-	    rightColumn.add(new JLabel("DŁUGOŚĆ"));
-	    rightColumn.add(new JLabel("NAŚNIEŻANIE"));
-	    rightColumn.add(new JLabel("OŚWIETLENIE"));
-		/*
-		for(String header : headings) {
-			rightColumn.add(new JLabel(header));
+		
+		String[][] rightTableData = skiRunsArrayList.toArray(new String[skiRunsArrayList.size()][]);
+		String[] columnNames = {"Trasa", "Trudność", "Czynna", "Pokrywa śnieżna", "Długość", "Naśnieżanie", "Oświetlenie"};
+		
+		rightTable = new JTable(rightTableData, columnNames);
+
+		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
+		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
+
+		for (int i = 0; i < rightTable.getColumnCount(); i++) {
+		    rightTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
-		*/
+		
+		TableColumnModel columnModel = rightTable.getColumnModel();
+		columnModel.getColumn(0).setPreferredWidth(60);
+		columnModel.getColumn(1).setPreferredWidth(120);
+		columnModel.getColumn(2).setPreferredWidth(60);
+		columnModel.getColumn(3).setPreferredWidth(100);
+		columnModel.getColumn(4).setPreferredWidth(80);
+		columnModel.getColumn(5).setPreferredWidth(100);
+		columnModel.getColumn(6).setPreferredWidth(100);
+		rightTable.setPreferredScrollableViewportSize(new Dimension(620, 310)); 
+
+
+		
+		//rightTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+		JScrollPane scrollPane = new JScrollPane(rightTable);
+		scrollPane.setBackground(new Color(255,255,255));
+	    /*
 		for(String[] array : skiRunsArrayList) {
 			for(String elem : array) {
 				rightColumn.add(new JLabel(elem));
 			}
 		}
-		
+		*/
 		
 		
 		mainPanel.add(leftColumn, BorderLayout.WEST);
-		mainPanel.add(rightColumn, BorderLayout.EAST);
+		mainPanel.add(scrollPane, BorderLayout.EAST);
+		
 		frame.add(mainPanel, BorderLayout.CENTER);
 	
 	
@@ -136,20 +177,107 @@ public class Kotelnica {
 		frame.add(logoPanel, BorderLayout.NORTH);
 	}
 	
+	private void initBottomPanel(){
+		int hard=0, easy=0,veryEasy=0, other=0;
+		for(String difficulty : difficultyLevel) {
+			if(difficulty.equals("trudna")) {
+				hard++;
+			}else if(difficulty.equals("łatwa")) {
+				easy++;
+			}else if(difficulty.equals("bardzo łatwa")) {
+				veryEasy++;
+			}else {
+				other++;
+			}
+		}
+		
+		// Wykres kołowy
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        dataset.setValue("Trudna", hard);
+        dataset.setValue("Łatwa", easy);
+        dataset.setValue("Bardzo łatwa", veryEasy);
+        dataset.setValue("Inne", other);
+
+        JFreeChart pieChart = ChartFactory.createPieChart(
+                "Rozkład Tras Narciarskich",
+                dataset,
+                true,
+                true,
+                false
+        );
+        PiePlot plot = (PiePlot) pieChart.getPlot();
+        plot.setSectionPaint("Łatwe", Color.GREEN);
+        plot.setSectionPaint("Trudne", Color.RED);
+        plot.setSectionPaint("Inne", Color.BLUE);
+
+        ChartPanel chartPanel = new ChartPanel(pieChart);
+        chartPanel.setBackground(new Color(255,255,255));
+        chartPanel.setPreferredSize(new Dimension(250, 250));
+
+        //wykres słupkowy
+        DefaultCategoryDataset barDataset = new DefaultCategoryDataset();
+        for (int i = 0; i < skiRunsArrayList.size(); i++) {
+            String skiRunName = skiRunsArrayList.get(i)[0];
+            int skiRunLength;
+
+            try {
+                skiRunLength = Integer.parseInt(skiRunsArrayList.get(i)[4].replaceAll("[^\\d.]", ""));
+            } catch (NumberFormatException e) {
+                logger.error("Error while parsing ski-run length", skiRunName, e.getMessage());
+                
+            	skiRunLength = 0; 
+            }
+
+            barDataset.addValue(skiRunLength, "Długość trasy", skiRunName);
+        }
+
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Długość tras narciarskich",
+                "Trasa",
+                "Długość (m)",
+                barDataset,
+                PlotOrientation.VERTICAL,
+                true,
+                true,
+                false
+        );
+        
+        ChartPanel barChartPanel = new ChartPanel(barChart);
+        barChartPanel.setBackground(new Color(255,255,255));
+        barChartPanel.setPreferredSize(new Dimension(700, 350));
+        
+        
+        bottomPanel.setLayout(new BorderLayout());
+        bottomPanel.setBackground(new Color(255,255,255));
+	    bottomPanel.add(chartPanel, BorderLayout.WEST);
+		bottomPanel.add(barChartPanel, BorderLayout.EAST);
+		
+		frame.add(bottomPanel, BorderLayout.SOUTH);
+	}
+	
+	
+
+	
 	void webScrapper() {
 		
 		try {
 			final Document document = Jsoup.connect(conditionsUrl).get();
 			logger.info("Activate web scrapper for weather data.");
+			String condition;
+			String value;
 			for(Element row : document.select("table#weather-data-current tr")) {
 				if(row.select("td.name").text().equals("")) {
 					continue;
 				} else {
-					String condition = row.select("td.name").text();
-					String value = row.select("td.value").text();
+					condition = row.select("td.name").text();
+					value = row.select("td.value").text();
+					if(condition.equals("Wiatr")) {
+						value = value.replaceAll("\\s.*", "");
+					}
+
 					weatherDataMap.put(condition, value);
-					System.out.println(condition + " : " + value);
-					logger.info("Weather Condition: {} - Value: {}", condition, value);
+					//System.out.println(condition + " : " + value);
+					logger.debug("Weather Condition: {} - Value: {}", condition, value);
 				}
 			}
 		} catch (IOException e){
@@ -162,18 +290,8 @@ public class Kotelnica {
 		try {
 			final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).get();
 			logger.info("Activate web scrapper for ski runs data.");
-			/*
-			for(Element row : skiRunsDoc.select("thead tr")) {
-				headings.add(row.select("th.ski-run").text());
-				headings.add(row.select("th.center.is-active").text());
-				headings.add(row.select("th.ice-sheet").text());
-				headings.add(row.select("th.length").text());
-				headings.add(row.select("th.center.snow").text());
-				headings.add(row.select("th.center.light").text());
-			}
-			*/
+			
 			for(Element row : skiRunsDoc.select("table tr")) {
-				//headings.add(row.select("th:is(.ski-run, .center.is-active, .ice-sheet, .length, .center.snow, .center.light").text());
 				
 				if(row.select("td.difficulty-level").text().equals("")) {
 					continue;
