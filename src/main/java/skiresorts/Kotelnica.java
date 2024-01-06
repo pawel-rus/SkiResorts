@@ -5,10 +5,14 @@ import org.apache.logging.log4j.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
+import org.jfree.chart.renderer.category.BarRenderer;
+import org.jfree.chart.renderer.category.CategoryItemRenderer;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -21,7 +25,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
-
+import java.awt.Paint;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -212,8 +216,8 @@ public class Kotelnica {
 
         ChartPanel chartPanel = new ChartPanel(pieChart);
         chartPanel.setBackground(new Color(255,255,255));
-        chartPanel.setPreferredSize(new Dimension(250, 250));
-
+        chartPanel.setPreferredSize(new Dimension(350, 350));
+        /*
         //wykres słupkowy
         DefaultCategoryDataset barDataset = new DefaultCategoryDataset();
         for (int i = 0; i < skiRunsArrayList.size(); i++) {
@@ -227,10 +231,13 @@ public class Kotelnica {
                 
             	skiRunLength = 0; 
             }
-
+            
+            
             barDataset.addValue(skiRunLength, "Długość trasy", skiRunName);
-        }
 
+        }
+        
+        
         JFreeChart barChart = ChartFactory.createBarChart(
                 "Długość tras narciarskich",
                 "Trasa",
@@ -241,10 +248,68 @@ public class Kotelnica {
                 true,
                 false
         );
-        
+      
+	
         ChartPanel barChartPanel = new ChartPanel(barChart);
         barChartPanel.setBackground(new Color(255,255,255));
         barChartPanel.setPreferredSize(new Dimension(700, 350));
+        */
+        
+     
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Długość tras narciarskich",
+                "Trasa",
+                "Długość (m)",
+                new DefaultCategoryDataset(),
+                PlotOrientation.VERTICAL,
+                false,
+                true,
+                false
+        );
+
+        ChartPanel barChartPanel = new ChartPanel(barChart);
+        barChartPanel.setBackground(new Color(255, 255, 255));
+        barChartPanel.setPreferredSize(new Dimension(700, 350));
+
+        // Pobierz kategorię do ustawienia koloru
+        CategoryPlot categoryPlot = barChart.getCategoryPlot();
+
+        DefaultCategoryDataset barDataset = (DefaultCategoryDataset) categoryPlot.getDataset();
+
+        for (int i = 0; i < skiRunsArrayList.size(); i++) {
+            String skiRunName = skiRunsArrayList.get(i)[0];
+            int skiRunLength;
+
+            try {
+                skiRunLength = Integer.parseInt(skiRunsArrayList.get(i)[4].replaceAll("[^\\d.]", ""));
+            } catch (NumberFormatException e) {
+                logger.error("Error while parsing ski-run length", skiRunName, e.getMessage());
+
+                skiRunLength = 0;
+            }
+
+            String difficulty = difficultyLevel.get(i);
+            Paint color;
+            switch (difficulty.toLowerCase()) {
+                case "trudna":
+                    color = Color.RED;
+                    break;
+                case "łatwa":
+                    color = Color.BLUE;
+                    break;
+                case "bardzo łatwa":
+                    color = Color.GREEN;
+                    break;
+                default:
+                    color = Color.YELLOW;
+            }
+
+            // Unikalna nazwa serii dla każdej trasy
+            String seriesKey = skiRunName + " - " + difficulty;
+            
+            barDataset.addValue(skiRunLength, seriesKey, skiRunName);
+            categoryPlot.getRenderer().setSeriesPaint(i, color);
+        }
         
         
         bottomPanel.setLayout(new BorderLayout());
