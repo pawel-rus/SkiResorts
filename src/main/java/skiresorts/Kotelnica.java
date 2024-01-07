@@ -73,6 +73,7 @@ public class Kotelnica {
 		initLogoPanel();
 		initMainPanel();
 		initBottomPanel();
+		
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
@@ -341,8 +342,8 @@ public class Kotelnica {
 					}
 
 					weatherDataMap.put(condition, value);
-					//System.out.println(condition + " : " + value);
-					logger.debug("Weather Condition: {} - Value: {}", condition, value);
+					System.out.println(condition + " : " + value);
+					//logger.debug("Weather Condition: {} - Value: {}", condition, value);
 				}
 			}
 		} catch (IOException e){
@@ -390,10 +391,10 @@ public class Kotelnica {
 		logger.info("Ski Runs Data: ");
 		for(String[] array : skiRunsArrayList) {
 			for(String elem : array) {
-				//System.out.print(elem + " ");
-				logger.debug(elem + " ");
+				System.out.print(elem + " ");
+				//logger.debug(elem + " ");
 			}
-			//System.out.println();
+			System.out.println();
 			//logger.debug("");
 		}
 	}

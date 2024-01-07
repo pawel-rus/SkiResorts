@@ -23,7 +23,7 @@ public class ResortsList implements ActionListener {
 	private JPanel titlePanel  = new JPanel();
 	private JPanel listPanel  = new JPanel();
 	private JLabel nameField = new JLabel();
-    private String[] resorts = {"Szczyrk Mountain Resort", "Kotelnica Białczańska", "Resort 3"};
+    private String[] resorts = {"Szczyrk Mountain Resort", "Kotelnica Białczańska", "Korbielów"};
 	JButton[] buttons = new JButton[resorts.length];
 
 	
@@ -100,6 +100,8 @@ public class ResortsList implements ActionListener {
 				new Kotelnica();
 				break;
 			case 2:
+				logger.info("Opening Korbielów Details.");
+				new Korbielow();
 				break;
 			default:
 				break;
