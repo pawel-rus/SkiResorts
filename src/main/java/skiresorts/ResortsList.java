@@ -10,6 +10,8 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -25,8 +27,8 @@ public class ResortsList implements ActionListener {
 	private JLabel nameField = new JLabel();
     private String[] resorts = {"Szczyrk Mountain Resort", "Kotelnica Białczańska", "Korbielów"};
 	JButton[] buttons = new JButton[resorts.length];
-
-	
+	Color myColor = new Color(255,255,204);
+	Boolean connection;
 	
 	ResortsList(){
 		initFrame();
@@ -37,13 +39,13 @@ public class ResortsList implements ActionListener {
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setVisible(true);
 		logger.info("ResortsList initialized.");
-		new InternetConnectionChecker();
+		connection = new InternetConnectionChecker().isInternetAvailable();
 	}
 	
 	private void initFrame() {
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//mainFrame.setSize(600,600);
-		mainFrame.getContentPane().setBackground(new Color(255,255,204));
+		mainFrame.getContentPane().setBackground(myColor);
 		mainFrame.setLayout(new BorderLayout());
 		//mainFrame.setLocationRelativeTo(null);
 		
@@ -52,7 +54,7 @@ public class ResortsList implements ActionListener {
 		titlePanel.setLayout(new BorderLayout());
 		//titlePanel.setBounds(0,0,600,80);
 		
-		nameField.setBackground(new Color(255,255,204));
+		nameField.setBackground(myColor);
 		//nameField.setForeground(new Color(25,255,0));
 		nameField.setFont(new Font("Helvetica",Font.BOLD,60));
 		nameField.setHorizontalAlignment(JLabel.CENTER);
@@ -66,7 +68,7 @@ public class ResortsList implements ActionListener {
 	private void initListPanel() {
         listPanel.setLayout(new GridLayout(3,1));
 		//listPanel.setBounds(0,80,600,520);
-		listPanel.setBackground(new Color(255, 255, 204));
+		listPanel.setBackground(myColor);
 		
 		//initialize buttons
 		for(int i=0; i<resorts.length; i++) {
@@ -75,14 +77,30 @@ public class ResortsList implements ActionListener {
 			buttons[i].setForeground(new Color (25,255,200));
 			buttons[i].setFocusable(false);
 			buttons[i].addActionListener(this);
-			buttons[i].setBackground(new Color(255, 255, 204));
+			buttons[i].setBackground(myColor);
 			listPanel.add(buttons[i]);
+			
+			int finalI = i; 
+			buttons[i].addMouseListener(new java.awt.event.MouseAdapter() {
+				@Override
+		        public void mouseEntered(java.awt.event.MouseEvent evt) {
+		            buttons[finalI].setBackground(new Color(173, 216, 230)); // Zmiana koloru po najechaniu myszą
+		        }
+				@Override
+		        public void mouseExited(java.awt.event.MouseEvent evt) {
+		            buttons[finalI].setBackground(myColor); // back to myColor
+		        }
+		    });
 		}
 		
 		mainFrame.add(listPanel, BorderLayout.CENTER);
 	}
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		if(!connection) {
+			logger.fatal("No internet connection, it isn't possible to display informations about ski resorts.");
+			System.exit(1);
+		}
 		int index = 0;
 		for (int i = 0; i < buttons.length; i++) {
             if (e.getSource() == buttons[i]) {
@@ -108,9 +126,6 @@ public class ResortsList implements ActionListener {
 		}
 	}
 	
-	void openResortDetails(String resortName){
-		
-	}
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
