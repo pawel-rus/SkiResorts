@@ -2,6 +2,7 @@ package main.java.skiresorts;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,19 +14,28 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
-
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import  java.util.concurrent.ExecutionException;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.table.DefaultTableModel;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import org.jfree.chart.ChartFactory;
+import org.jfree.chart.ChartPanel;
+import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
+import org.jfree.chart.plot.CategoryPlot;
+import org.jfree.data.category.DefaultCategoryDataset;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -38,20 +48,25 @@ public class Korbielow {
     private JFrame frame = new JFrame("Korbielów");
 	private JPanel logoPanel  = new JPanel();
 	private JPanel mainPanel  = new JPanel();
-	private JPanel bottomPanel = new JPanel();
+	
 	
 	private Color myColor = new Color(255, 255, 255);
 	private HashMap<String, String> weatherDataMap = new LinkedHashMap<>();
 	List<String[]> skiRunsArrayList = new ArrayList<>();
+	List<String[]> skiLiftsArrayList = new ArrayList<>();
 
 	Korbielow(){
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setBackground(myColor);
 		frame.setLayout(new BorderLayout());
+		
+		scrapeAllData();
+		//scrapeWeatherData();
+		//skiWebScrapper();
+		//skiLiftsWebScrapper();
+		
 		initLogoPanel();
 		initMainPanel();
-		//skiWebScrapper();
-		
 		
 		frame.add(logoPanel, BorderLayout.NORTH);
 		frame.add(mainPanel, BorderLayout.CENTER);
@@ -84,25 +99,24 @@ public class Korbielow {
 			logoPanel.add(nameField, BorderLayout.WEST);
 		}
 		//adding weather data
-		scrapeWeatherData();
 		JPanel weatherPanel = new JPanel();
 		weatherPanel.setBackground(myColor);
 		weatherPanel.setLayout(new GridLayout(weatherDataMap.size(),2));
+		logger.info("Adding Labels to weatherPanel");
 		for(String condition : weatherDataMap.keySet()) {
-			logger.info("Adding Labels to weatherPanel");
+			logger.debug("Adding Labels to weatherPanel - Condition: {}, Value: {}", condition, weatherDataMap.get(condition));
 			weatherPanel.add(new JLabel(condition));
 			weatherPanel.add(new JLabel(weatherDataMap.get(condition)));
 		}
 	    logoPanel.add(weatherPanel, BorderLayout.CENTER);
 	    
-	    //JPanel rightPanel = new JPanel();
-	    //logoPanel.add(rightPanel, BorderLayout.EAST);
 	}
 	
 	private void initMainPanel() {
-		skiWebScrapper();
+		
 		mainPanel.setBackground(myColor);
 		mainPanel.setLayout(new BorderLayout());
+		
 		JPanel skiPanel = new JPanel();
 		skiPanel.setBackground(myColor);
 		
@@ -149,11 +163,60 @@ public class Korbielow {
 	    }
 	    
 	    JScrollPane scrollPane = new JScrollPane(skiPanel);
-	    mainPanel.add(scrollPane);
+	    mainPanel.add(scrollPane,BorderLayout.NORTH);
+	    
 		//mainPanel.add(skiPanel);
-		
+	    
+	    JPanel buttonsPanel = new JPanel();
+        buttonsPanel.setBackground(myColor);
+        buttonsPanel.setLayout(new GridLayout(1,2));
+
+        JButton showLiftsButton = new JButton("Pokaż dane o wyciągach");
+        showLiftsButton.addActionListener(e -> showLiftsDataDialog());
+        
+        JButton showChartButton = new JButton("Pokaż wykres");
+        showChartButton.addActionListener(e -> showSkiRunsChart());
+        
+        buttonsPanel.add(showLiftsButton);
+		buttonsPanel.add(showChartButton);
+        mainPanel.add(buttonsPanel, BorderLayout.SOUTH);
+	    
 	}
 	
+	private void scrapeAllData() {
+        logger.info("Activate scrapeAllData() method.");
+
+	    try(ExecutorService executorService = Executors.newFixedThreadPool(3)) {
+	        // Przekazuj zadania do puli wątków
+	    	logger.info("Creating a new thread pool.");
+	        Future<Void> weatherDataFuture = executorService.submit(() -> {
+	            scrapeWeatherData();
+	            return null;
+	        });
+
+	        Future<Void> skiRunsFuture = executorService.submit(() -> {
+	            skiWebScrapper();
+	            return null;
+	        });
+
+	        Future<Void> skiLiftsFuture = executorService.submit(() -> {
+	            skiLiftsWebScrapper();
+	            return null;
+	        });
+
+	        // wait for all threads to finish
+	        weatherDataFuture.get();
+	        skiRunsFuture.get();
+	        skiLiftsFuture.get();
+	    } catch (InterruptedException | ExecutionException e) {
+	        logger.error("Error while fetching data: " + e.getMessage());
+	        e.printStackTrace();
+	    } finally {
+	        logger.info("Scrapping all data finished.");
+	    }
+	}
+
+
 
 	private void scrapeWeatherData() {
 	    try {
@@ -166,7 +229,7 @@ public class Korbielow {
                 condition = row.select(".table_caption").text();
                 value = row.select(".table_value").text();
                 weatherDataMap.put(condition, value);
-                System.out.println(condition + " " + value);
+                logger.debug("Weather Data: {} - {}", condition, value);
             }
 	        
 	    } catch (IOException e) {
@@ -176,10 +239,6 @@ public class Korbielow {
 	    }
 	}
 
-
-
-
-	
 	private void skiWebScrapper() {
         try {
             final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).get();
@@ -215,14 +274,13 @@ public class Korbielow {
     							elevationDifference
     					});
                         
-                        // Process the extracted data as needed
-                        System.out.println("Status: " + status);
-                        System.out.println("Name and Difficulty: " + name);
-                        System.out.println("Conditions: " + conditions);
-                        System.out.println("Snow Range: " + snowRange);
-                        System.out.println("Length: " + length);
-                        System.out.println("Elevation Difference: " + elevationDifference);
-                        System.out.println("-----------------------");
+                        logger.debug("Status: {}", status);
+                        logger.debug("Name and Difficulty: {}", name);
+                        logger.debug("Conditions: {}", conditions);
+                        logger.debug("Snow Range: {}", snowRange);
+                        logger.debug("Length: {}", length);
+                        logger.debug("Elevation Difference: {}", elevationDifference);
+                        logger.debug("-----------------------");
                     }
                 }
             }
@@ -231,6 +289,98 @@ public class Korbielow {
             e.printStackTrace();
             System.exit(1);
         }
+    }
+	
+	private void skiLiftsWebScrapper() {
+	    try {
+	        final Document skiLiftsDoc = Jsoup.connect(skiRunsUrl).get();
+	        System.out.println("Activate web scrapper for ski lifts data.");
+
+	        Elements rows = skiLiftsDoc.select("table.tg tbody tr");
+	        for (Element row : rows) {
+	            Elements cells = row.select("td");
+
+	            if (cells.size() == 3) {
+	                String status = cells.get(0).select("img").attr("src");
+
+	                if (!status.isEmpty()) {
+	                    String liftName = cells.get(1).text();
+	                    String liftType = cells.get(2).text();
+
+	                    skiLiftsArrayList.add(new String[]{
+	                            status,
+	                            liftName,
+	                            liftType
+	                    });
+
+	                    logger.debug("Status: {}", status);
+                        logger.debug("Lift Name: {}", liftName);
+                        logger.debug("Lift Type: {}", liftType);
+                        logger.debug("-----------------------");
+	                }
+	            }
+	        }
+	    } catch (IOException e) {
+	        System.err.println("Error while fetching ski lifts data: " + e.getMessage());
+	        e.printStackTrace();
+	        System.exit(1);
+	    }
+	}
+	
+	private void showLiftsDataDialog() {
+        logger.info("Activate showLiftsDataDialog() method.");
+
+	    JPanel panel = new JPanel();
+	    panel.setLayout(new GridLayout(0, 1));
+
+	    for (String[] liftData : skiLiftsArrayList) {
+	        
+	        int index = liftData[0].lastIndexOf("/");
+	        String fileName = liftData[0].substring(index + 1);
+	        ImageIcon statusIcon = new ImageIcon("resources/" + fileName);
+	        JLabel statusImageLabel = new JLabel(statusIcon);
+	        panel.add(statusImageLabel);
+	        
+	        JLabel liftNameValueLabel = new JLabel(liftData[1]);
+	        liftNameValueLabel.setHorizontalAlignment(JLabel.CENTER);
+	        panel.add(liftNameValueLabel);
+
+	        JLabel liftTypeValueLabel = new JLabel(liftData[2]);
+	        liftTypeValueLabel.setHorizontalAlignment(JLabel.CENTER);
+
+	        panel.add(liftTypeValueLabel);
+	    }
+
+	    JScrollPane scrollPane = new JScrollPane(panel);
+	    
+	    JOptionPane.showMessageDialog(null, scrollPane, "Dane o wyciągach narciarskich", JOptionPane.PLAIN_MESSAGE);
+	}
+
+	private void showSkiRunsChart() {
+        logger.info("Activate showSkiRunsChart() method.");
+
+        DefaultCategoryDataset dataset = new DefaultCategoryDataset();
+        for (String[] skiRun : skiRunsArrayList) {
+            String name = skiRun[1];
+            double length = Double.parseDouble(skiRun[4].replaceAll("[^\\d.]", "")); // delete non-numbers
+            dataset.addValue(length, "Długość tras narciarskich", name);
+        }
+        // create
+        JFreeChart chart = ChartFactory.createBarChart(
+                "Długość tras narciarskich",
+                "Trasy narciarskie",
+                "Długość (m)",
+                dataset
+        );
+        
+        CategoryPlot plot = (CategoryPlot) chart.getPlot();
+        CategoryAxis categoryAxis = plot.getDomainAxis();
+        categoryAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+        
+        ChartPanel chartPanel = new ChartPanel(chart);
+        chartPanel.setPreferredSize(new Dimension(900, 600));
+
+        JOptionPane.showMessageDialog(null, chartPanel, "Wykres", JOptionPane.PLAIN_MESSAGE);
     }
 	
 	
