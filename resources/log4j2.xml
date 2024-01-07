@@ -43,6 +43,15 @@
     		</Policies>
 		</RollingFile>
 		
+		<RollingFile name="KorbielowLog"
+			fileName="${APP_LOG_ROOT}/Korbielow/app.log"
+			filePattern="${APP_LOG_ROOT}/Korbielow/app-%d{yyyy-MM-dd}-%i.log">
+			<PatternLayout pattern="${LOG_PATTERN}"/>
+			<Policies>
+        		<SizeBasedTriggeringPolicy size="50 KB"/>
+    		</Policies>
+		</RollingFile>
+		
 		<RollingFile name="ConnectionLog"
 			fileName="${APP_LOG_ROOT}/InternetConnectionChecker/app.log"
 			filePattern="${APP_LOG_ROOT}/InternetConnectionChecker/app-%d{yyyy-MM-dd}-%i.log">
@@ -99,7 +108,7 @@
             <LevelRangeFilter minLevel="DEBUG" maxLevel="DEBUG" onMatch="ACCEPT" onMismatch="DENY"/>
             <PatternLayout pattern="${LOG_LVL_PATTERN}"/>
             <Policies>
-        		<SizeBasedTriggeringPolicy size="50 KB"/>
+        		<SizeBasedTriggeringPolicy size="500 KB"/>
     		</Policies>
         </RollingFile>
         
@@ -128,6 +137,17 @@
 		
 		<Logger name="main.java.skiresorts.Kotelnica" level="trace" additivity="false">
 			<AppenderRef ref="KotelnicaLog" />
+			<AppenderRef ref="TraceLog" />
+			<AppenderRef ref="DebugLog" />
+			<AppenderRef ref="InfoLog" />
+			<AppenderRef ref="WarnLog" />
+			<AppenderRef ref="ErrorLog" />
+			<AppenderRef ref="FatalLog" />
+			<AppenderRef ref="Console" />
+		</Logger>
+		
+		<Logger name="main.java.skiresorts.Korbielow" level="trace" additivity="false">
+			<AppenderRef ref="KorbielowLog" />
 			<AppenderRef ref="TraceLog" />
 			<AppenderRef ref="DebugLog" />
 			<AppenderRef ref="InfoLog" />
