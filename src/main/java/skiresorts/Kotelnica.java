@@ -5,6 +5,8 @@ import org.apache.logging.log4j.Logger;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
+import org.jfree.chart.axis.CategoryAxis;
+import org.jfree.chart.axis.CategoryLabelPositions;
 import org.jfree.chart.plot.CategoryPlot;
 import org.jfree.chart.plot.PiePlot;
 import org.jfree.chart.plot.PlotOrientation;
@@ -33,8 +35,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -181,7 +185,21 @@ public class Kotelnica {
 		logoPanel.setOpaque(false);
 		frame.add(logoPanel, BorderLayout.NORTH);
 	}
+	private void initBottomPanel(){
+		JButton pieChart = new JButton("Wykres kołowy");
+		pieChart.addActionListener(e -> showPieChart());
+		JButton barChart = new JButton("Wykres słupkowy");
+		barChart.addActionListener(e -> showBarChart());
+		
+		bottomPanel.setLayout(new GridLayout(1,2));
+        bottomPanel.setBackground(new Color(255,255,255));
+	    bottomPanel.add(pieChart);
+		bottomPanel.add(barChart);
+		
+		frame.add(bottomPanel, BorderLayout.SOUTH);
+	}
 	
+	/*
 	private void initBottomPanel(){
 		int hard=0, easy=0,veryEasy=0, other=0;
 		for(String difficulty : difficultyLevel) {
@@ -254,7 +272,7 @@ public class Kotelnica {
         ChartPanel barChartPanel = new ChartPanel(barChart);
         barChartPanel.setBackground(new Color(255,255,255));
         barChartPanel.setPreferredSize(new Dimension(700, 350));
-        */
+        --------/
         
      
         JFreeChart barChart = ChartFactory.createBarChart(
@@ -320,9 +338,116 @@ public class Kotelnica {
 		
 		frame.add(bottomPanel, BorderLayout.SOUTH);
 	}
+	*/
 	
-	
+	private void showPieChart() {
+        int hard = 0, easy = 0, veryEasy = 0, other = 0;
+        for (String difficulty : difficultyLevel) {
+            if (difficulty.equals("trudna")) {
+                hard++;
+            } else if (difficulty.equals("łatwa")) {
+                easy++;
+            } else if (difficulty.equals("bardzo łatwa")) {
+                veryEasy++;
+            } else {
+                other++;
+            }
+        }
 
+        // Wykres kołowy
+        DefaultPieDataset dataset = new DefaultPieDataset();
+        dataset.setValue("Trudna", hard);
+        dataset.setValue("Łatwa", easy);
+        dataset.setValue("Bardzo łatwa", veryEasy);
+        dataset.setValue("Inne", other);
+
+        JFreeChart pieChart = ChartFactory.createPieChart(
+                "Rozkład Tras Narciarskich",
+                dataset,
+                true,
+                true,
+                false
+        );
+        PiePlot plot = (PiePlot) pieChart.getPlot();
+        plot.setSectionPaint("Łatwe", Color.GREEN);
+        plot.setSectionPaint("Trudne", Color.RED);
+        plot.setSectionPaint("Inne", Color.BLUE);
+
+        ChartPanel chartPanel = new ChartPanel(pieChart);
+        chartPanel.setBackground(new Color(255, 255, 255));
+        //chartPanel.setPreferredSize(new Dimension(350, 350));
+
+        JOptionPane.showMessageDialog(null, chartPanel, "Wykres kołowy", JOptionPane.PLAIN_MESSAGE);
+    }
+	
+	private void showBarChart() {
+        JFreeChart barChart = ChartFactory.createBarChart(
+                "Długość tras narciarskich",
+                "Trasa",
+                "Długość (m)",
+                new DefaultCategoryDataset(),
+                PlotOrientation.VERTICAL,
+                false,
+                true,
+                false
+        );
+        
+        
+        ChartPanel barChartPanel = new ChartPanel(barChart);
+        barChartPanel.setBackground(new Color(255, 255, 255));
+        //barChartPanel.setPreferredSize(new Dimension(700, 350));
+
+        // category to set color for each bar
+        CategoryPlot categoryPlot = barChart.getCategoryPlot();
+
+        DefaultCategoryDataset barDataset = (DefaultCategoryDataset) categoryPlot.getDataset();
+
+        for (int i = 0; i < skiRunsArrayList.size(); i++) {
+            String skiRunName = skiRunsArrayList.get(i)[0];
+            int skiRunLength;
+
+            try {
+                skiRunLength = Integer.parseInt(skiRunsArrayList.get(i)[4].replaceAll("[^\\d.]", ""));
+            } catch (NumberFormatException e) {
+                logger.error("Error while parsing ski-run length", skiRunName, e.getMessage());
+
+                skiRunLength = 0;
+            }
+
+            String difficulty = difficultyLevel.get(i);
+            Paint color;
+            switch (difficulty.toLowerCase()) {
+                case "trudna":
+                    color = Color.RED;
+                    break;
+                case "łatwa":
+                    color = Color.BLUE;
+                    break;
+                case "bardzo łatwa":
+                    color = Color.GREEN;
+                    break;
+                    
+                default:
+                    color = Color.YELLOW;
+            }
+
+            // Unikalna nazwa serii dla każdej trasy
+            String seriesKey = skiRunName + " - " + difficulty;
+
+            barDataset.addValue(skiRunLength, seriesKey, skiRunName);
+            //barDataset.addValue(skiRunLength, difficulty, skiRunName);
+
+            categoryPlot.getRenderer().setSeriesPaint(i, color);
+        }
+        CategoryAxis categoryAxis = categoryPlot.getDomainAxis();
+        categoryAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
+        //set width of the bars
+        BarRenderer renderer = (BarRenderer) barChart.getCategoryPlot().getRenderer();
+        renderer.setItemMargin(-20);
+        
+        JOptionPane.showMessageDialog(null, barChartPanel, "Wykres słupkowy", JOptionPane.PLAIN_MESSAGE);
+    }
+	
 	
 	void webScrapper() {
 		
