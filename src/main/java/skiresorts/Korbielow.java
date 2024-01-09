@@ -216,8 +216,6 @@ public class Korbielow {
 	    }
 	}
 
-
-
 	private void scrapeWeatherData() {
 	    try {
 	        final Document weatherDoc = Jsoup.connect(weatherUrl).get();
