@@ -13,16 +13,13 @@ import org.jfree.chart.plot.PlotOrientation;
 import org.jfree.data.category.DefaultCategoryDataset;
 import org.jfree.data.general.DefaultPieDataset;
 import org.jfree.chart.renderer.category.BarRenderer;
-import org.jfree.chart.renderer.category.CategoryItemRenderer;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -39,33 +36,37 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
-import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 
-
+/**
+ * Class representing the details page for the "Kotelnica Białczańska" ski resort.
+ */
 public class Kotelnica {
+    // Logger for logging events specific to Kotelnica class
     private static Logger logger = LogManager.getLogger(Kotelnica.class);
-    
+    // URL for fetching current weather conditions
     final String conditionsUrl = "https://bialkatatrzanska.pl/pogoda/aktualne-warunki-pogodowe";
+    // URL for fetching ski runs information
     final String skiRunsUrl = "https://bialkatatrzanska.pl/warunki-narciarskie";
-    
+    // JFrame for the Kotelnica details window
 	private JFrame frame = new JFrame("Kotelnica Białczańska");
+    // JPanel for displaying the resort's logo
 	private JPanel logoPanel  = new JPanel();
+    // JPanel for the main content of the details window
 	private JPanel mainPanel  = new JPanel();
+    // JPanel for additional controls at the bottom of the details window
 	private JPanel bottomPanel = new JPanel();
+    // JTable for displaying ski runs information
 	private JTable rightTable;
-	
+	// HashMap to store weather conditions and their values
 	private HashMap<String, String> weatherDataMap = new LinkedHashMap<>();
 	List<String[]> skiRunsArrayList = new ArrayList<>();
-	
+	// Lists to store ski runs information
 	List<String> skiRunsList = new ArrayList<>();
 	List<String> difficultyLevel = new ArrayList<>();
 	List<String> isActive = new ArrayList<>();
@@ -73,7 +74,10 @@ public class Kotelnica {
 	List<String> skiLength = new ArrayList<>();
 	List<String> snow = new ArrayList<>();
 	List<String> light = new ArrayList<>();
-	
+	/**
+     * Constructor for the Kotelnica class. 
+     * Initializes the frame and sets up the GUI components.
+     */
 	Kotelnica(){
 		initFrame();
 		initLogoPanel();
@@ -85,7 +89,9 @@ public class Kotelnica {
 		frame.setVisible(true);
 		logger.info("Kotelnica initialized.");
 	}
-	
+	/**
+     * Initializes the main frame of the Kotelnica details window.
+     */
 	void initFrame() {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		//frame.getContentPane().setBackground(new Color(255,255,204));
@@ -95,6 +101,9 @@ public class Kotelnica {
 		
 	}
 	
+	/**
+     * Initializes the main content panel of the Kotelnica details window.
+     */
 	private void initMainPanel() {
 		webScrapper();
 		
@@ -123,14 +132,15 @@ public class Kotelnica {
 		String[] columnNames = {"Trasa", "Trudność", "Czynna", "Pokrywa śnieżna", "Długość", "Naśnieżanie", "Oświetlenie"};
 		
 		rightTable = new JTable(rightTableData, columnNames);
-
+		
+        // Code for centering text in JTable cells
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
 		centerRenderer.setHorizontalAlignment(SwingConstants.CENTER);
 
 		for (int i = 0; i < rightTable.getColumnCount(); i++) {
 		    rightTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 		}
-		
+		// Code for adjusting column widths in JTable
 		TableColumnModel columnModel = rightTable.getColumnModel();
 		columnModel.getColumn(0).setPreferredWidth(60);
 		columnModel.getColumn(1).setPreferredWidth(120);
@@ -163,6 +173,9 @@ public class Kotelnica {
 	
 	}
 	
+	/**
+     * Initializes the panel for displaying the resort logo.
+     */
 	void initLogoPanel(){
 	
 		logoPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
@@ -187,6 +200,10 @@ public class Kotelnica {
 		logoPanel.setOpaque(false);
 		frame.add(logoPanel, BorderLayout.NORTH);
 	}
+	
+	/**
+     * Initializes the panel for additional buttons at the bottom of the details window.
+     */
 	private void initBottomPanel(){
 		JButton pieChart = new JButton("Wykres kołowy");
 		pieChart.addActionListener(e -> showPieChart());
@@ -201,147 +218,10 @@ public class Kotelnica {
 		frame.add(bottomPanel, BorderLayout.SOUTH);
 	}
 	
-	/*
-	private void initBottomPanel(){
-		int hard=0, easy=0,veryEasy=0, other=0;
-		for(String difficulty : difficultyLevel) {
-			if(difficulty.equals("trudna")) {
-				hard++;
-			}else if(difficulty.equals("łatwa")) {
-				easy++;
-			}else if(difficulty.equals("bardzo łatwa")) {
-				veryEasy++;
-			}else {
-				other++;
-			}
-		}
-		
-		// Wykres kołowy
-        DefaultPieDataset dataset = new DefaultPieDataset();
-        dataset.setValue("Trudna", hard);
-        dataset.setValue("Łatwa", easy);
-        dataset.setValue("Bardzo łatwa", veryEasy);
-        dataset.setValue("Inne", other);
-
-        JFreeChart pieChart = ChartFactory.createPieChart(
-                "Rozkład Tras Narciarskich",
-                dataset,
-                true,
-                true,
-                false
-        );
-        PiePlot plot = (PiePlot) pieChart.getPlot();
-        plot.setSectionPaint("Łatwe", Color.GREEN);
-        plot.setSectionPaint("Trudne", Color.RED);
-        plot.setSectionPaint("Inne", Color.BLUE);
-
-        ChartPanel chartPanel = new ChartPanel(pieChart);
-        chartPanel.setBackground(new Color(255,255,255));
-        chartPanel.setPreferredSize(new Dimension(350, 350));
-        /*
-        //wykres słupkowy
-        DefaultCategoryDataset barDataset = new DefaultCategoryDataset();
-        for (int i = 0; i < skiRunsArrayList.size(); i++) {
-            String skiRunName = skiRunsArrayList.get(i)[0];
-            int skiRunLength;
-
-            try {
-                skiRunLength = Integer.parseInt(skiRunsArrayList.get(i)[4].replaceAll("[^\\d.]", ""));
-            } catch (NumberFormatException e) {
-                logger.error("Error while parsing ski-run length", skiRunName, e.getMessage());
-                
-            	skiRunLength = 0; 
-            }
-            
-            
-            barDataset.addValue(skiRunLength, "Długość trasy", skiRunName);
-
-        }
-        
-        
-        JFreeChart barChart = ChartFactory.createBarChart(
-                "Długość tras narciarskich",
-                "Trasa",
-                "Długość (m)",
-                barDataset,
-                PlotOrientation.VERTICAL,
-                true,
-                true,
-                false
-        );
-      
 	
-        ChartPanel barChartPanel = new ChartPanel(barChart);
-        barChartPanel.setBackground(new Color(255,255,255));
-        barChartPanel.setPreferredSize(new Dimension(700, 350));
-        --------/
-        
-     
-        JFreeChart barChart = ChartFactory.createBarChart(
-                "Długość tras narciarskich",
-                "Trasa",
-                "Długość (m)",
-                new DefaultCategoryDataset(),
-                PlotOrientation.VERTICAL,
-                false,
-                true,
-                false
-        );
-
-        ChartPanel barChartPanel = new ChartPanel(barChart);
-        barChartPanel.setBackground(new Color(255, 255, 255));
-        barChartPanel.setPreferredSize(new Dimension(700, 350));
-
-        // Pobierz kategorię do ustawienia koloru
-        CategoryPlot categoryPlot = barChart.getCategoryPlot();
-
-        DefaultCategoryDataset barDataset = (DefaultCategoryDataset) categoryPlot.getDataset();
-
-        for (int i = 0; i < skiRunsArrayList.size(); i++) {
-            String skiRunName = skiRunsArrayList.get(i)[0];
-            int skiRunLength;
-
-            try {
-                skiRunLength = Integer.parseInt(skiRunsArrayList.get(i)[4].replaceAll("[^\\d.]", ""));
-            } catch (NumberFormatException e) {
-                logger.error("Error while parsing ski-run length", skiRunName, e.getMessage());
-
-                skiRunLength = 0;
-            }
-
-            String difficulty = difficultyLevel.get(i);
-            Paint color;
-            switch (difficulty.toLowerCase()) {
-                case "trudna":
-                    color = Color.RED;
-                    break;
-                case "łatwa":
-                    color = Color.BLUE;
-                    break;
-                case "bardzo łatwa":
-                    color = Color.GREEN;
-                    break;
-                default:
-                    color = Color.YELLOW;
-            }
-
-            // Unikalna nazwa serii dla każdej trasy
-            String seriesKey = skiRunName + " - " + difficulty;
-            
-            barDataset.addValue(skiRunLength, seriesKey, skiRunName);
-            categoryPlot.getRenderer().setSeriesPaint(i, color);
-        }
-        
-        
-        bottomPanel.setLayout(new BorderLayout());
-        bottomPanel.setBackground(new Color(255,255,255));
-	    bottomPanel.add(chartPanel, BorderLayout.WEST);
-		bottomPanel.add(barChartPanel, BorderLayout.EAST);
-		
-		frame.add(bottomPanel, BorderLayout.SOUTH);
-	}
-	*/
-	
+	/**
+	 * Displays a pie chart showing the distribution of ski runs by difficulty level.
+	 */
 	private void showPieChart() {
         int hard = 0, easy = 0, veryEasy = 0, other = 0;
         for (String difficulty : difficultyLevel) {
@@ -355,14 +235,14 @@ public class Kotelnica {
                 other++;
             }
         }
-
-        // Wykres kołowy
+        // Create a dataset for the pie chart
         DefaultPieDataset dataset = new DefaultPieDataset();
         dataset.setValue("Trudna", hard);
         dataset.setValue("Łatwa", easy);
         dataset.setValue("Bardzo łatwa", veryEasy);
         dataset.setValue("Inne", other);
-
+        
+        // Create a pie chart
         JFreeChart pieChart = ChartFactory.createPieChart(
                 "Rozkład Tras Narciarskich",
                 dataset,
@@ -370,18 +250,22 @@ public class Kotelnica {
                 true,
                 false
         );
+        // Customize pie chart plot
         PiePlot plot = (PiePlot) pieChart.getPlot();
         plot.setSectionPaint("Łatwe", Color.GREEN);
         plot.setSectionPaint("Trudne", Color.RED);
         plot.setSectionPaint("Inne", Color.BLUE);
-
+        
+        // Create a chart panel for displaying the pie chart
         ChartPanel chartPanel = new ChartPanel(pieChart);
         chartPanel.setBackground(new Color(255, 255, 255));
-        //chartPanel.setPreferredSize(new Dimension(350, 350));
-
+        // Display the pie chart in a dialog box
         JOptionPane.showMessageDialog(null, chartPanel, "Wykres kołowy", JOptionPane.PLAIN_MESSAGE);
     }
 	
+	/**
+	 * Displays a bar chart showing the lengths of ski runs based on difficulty level.
+	 */
 	private void showBarChart() {
         JFreeChart barChart = ChartFactory.createBarChart(
                 "Długość tras narciarskich",
@@ -394,16 +278,17 @@ public class Kotelnica {
                 false
         );
         
-        
+        // Create a chart panel for displaying the bar chart
         ChartPanel barChartPanel = new ChartPanel(barChart);
         barChartPanel.setBackground(new Color(255, 255, 255));
-        //barChartPanel.setPreferredSize(new Dimension(700, 350));
 
-        // category to set color for each bar
+        // Access the category plot for customizing
         CategoryPlot categoryPlot = barChart.getCategoryPlot();
-
+        
+        // Create a dataset for the bar chart
         DefaultCategoryDataset barDataset = (DefaultCategoryDataset) categoryPlot.getDataset();
 
+        // Iterate through ski runs and add data to the dataset
         for (int i = 0; i < skiRunsArrayList.size(); i++) {
             String skiRunName = skiRunsArrayList.get(i)[0];
             int skiRunLength;
@@ -415,7 +300,7 @@ public class Kotelnica {
 
                 skiRunLength = 0;
             }
-
+            // Get difficulty level and set corresponding color
             String difficulty = difficultyLevel.get(i);
             Paint color;
             switch (difficulty.toLowerCase()) {
@@ -433,26 +318,27 @@ public class Kotelnica {
                     color = Color.YELLOW;
             }
 
-            // Unikalna nazwa serii dla każdej trasy
+            // Unique series key for each ski run
             String seriesKey = skiRunName + " - " + difficulty;
-
+            // Add data to the bar dataset and set bar color
             barDataset.addValue(skiRunLength, seriesKey, skiRunName);
-            //barDataset.addValue(skiRunLength, difficulty, skiRunName);
-
             categoryPlot.getRenderer().setSeriesPaint(i, color);
         }
+        // Customize category axis and renderer for the bar chart
         CategoryAxis categoryAxis = categoryPlot.getDomainAxis();
         categoryAxis.setCategoryLabelPositions(CategoryLabelPositions.UP_90);
         //set width of the bars
         BarRenderer renderer = (BarRenderer) barChart.getCategoryPlot().getRenderer();
         renderer.setItemMargin(-20);
-        
+        // Display the bar chart in a dialog box
         JOptionPane.showMessageDialog(null, barChartPanel, "Wykres słupkowy", JOptionPane.PLAIN_MESSAGE);
     }
 	
-	
+	/**
+     * Scrapes data from the web pages to populate weather and ski runs information.
+     */
 	void webScrapper() {
-		
+        // Code for scraping weather data
 		try {
 			final Document document = Jsoup.connect(conditionsUrl).get();
 			logger.info("Activate web scrapper for weather data.");
@@ -482,7 +368,7 @@ public class Kotelnica {
 	        logger.error("Method handleWebScrapperError() called.");
 		}
 		
-		
+        // Code for scraping ski runs data
 		try {
 			final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).get();
 			logger.info("Activate web scrapper for ski runs data.");

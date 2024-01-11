@@ -10,8 +10,7 @@ import javax.swing.SwingUtilities;
 public class ErrorHandler {
 
 	/**
-	 * Handles the error when fetching weather data.
-	 * 
+	 * Handles the error when scrapping web data.
 	 * @param frame Reference to the current JFrame to be closed.
 	 */
 	public void handleWebScrapperError(JFrame frame) {
@@ -27,6 +26,9 @@ public class ErrorHandler {
 		}
 	}
 	
+	/**
+	 * Handles the no Internet connection error
+	 */
 	public void handleConnectionError() {
 		 JOptionPane.showMessageDialog(null,
 	                "No internet connection, it isn't possible to display information about ski resorts.",

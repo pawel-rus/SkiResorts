@@ -25,7 +25,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,6 +41,10 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+/**
+ * The Korbielow class represents a GUI application for displaying ski resort information,
+ * including weather data, ski runs, and ski lifts.
+ */
 public class Korbielow {
     private static Logger logger = LogManager.getLogger(Korbielow.class);
     final String skiRunsUrl = "https://korbielow.net/komunikat-narciarski/";
@@ -55,7 +58,10 @@ public class Korbielow {
 	private HashMap<String, String> weatherDataMap = new LinkedHashMap<>();
 	List<String[]> skiRunsArrayList = new ArrayList<>();
 	List<String[]> skiLiftsArrayList = new ArrayList<>();
-
+	/**
+     * Constructor of the Korbielow class.
+     * Initializes the GUI frame and components, fetches ski resort data, and displays the information.
+     */
 	Korbielow(){
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		frame.getContentPane().setBackground(myColor);
@@ -76,6 +82,10 @@ public class Korbielow {
 		frame.setVisible(true);
 		logger.info("Korbielów initialized.");
 	}
+	
+	/**
+     * Initializes the logo panel, including the resort image or name and weather data.
+     */
 	private void initLogoPanel() {
 		logoPanel.setLayout(new BorderLayout());
 		logoPanel.setBackground(myColor);
@@ -113,6 +123,9 @@ public class Korbielow {
 	    
 	}
 	
+	/**
+     * Initializes the main panel, including a table of ski runs and buttons for displaying ski lifts data and charts.
+     */
 	private void initMainPanel() {
 		
 		mainPanel.setBackground(myColor);
@@ -166,8 +179,7 @@ public class Korbielow {
 	    JScrollPane scrollPane = new JScrollPane(skiPanel);
 	    mainPanel.add(scrollPane,BorderLayout.NORTH);
 	    
-		//mainPanel.add(skiPanel);
-	    
+        // Adding buttons to the main panel for displaying ski lifts data and charts
 	    JPanel buttonsPanel = new JPanel();
         buttonsPanel.setBackground(myColor);
         buttonsPanel.setLayout(new GridLayout(1,2));
@@ -184,11 +196,14 @@ public class Korbielow {
 	    
 	}
 	
+	/**
+     * Fetches all data including weather data, ski runs, and ski lifts using multiple threads.
+     */
 	private void scrapeAllData() {
         logger.info("Activate scrapeAllData() method.");
 
 	    try(ExecutorService executorService = Executors.newFixedThreadPool(3)) {
-	        // Przekazuj zadania do puli wątków
+	        // create a thread pool
 	    	logger.info("Creating a new thread pool.");
 	        Future<Void> weatherDataFuture = executorService.submit(() -> {
 	            scrapeWeatherData();
@@ -220,13 +235,22 @@ public class Korbielow {
 	    } 
 	}
 
+	/**
+	 * Scrapes weather data from the specified URL using Jsoup.
+	 * Parses the HTML document to extract condition-value pairs,
+	 * @throws IOException if an error occurs while fetching or parsing the data.
+	 */
 	private void scrapeWeatherData() throws IOException {
 	    try {
+	        // Connect to the weather URL and fetch the document
 	        final Document weatherDoc = Jsoup.connect(weatherUrl).get();
 	        logger.info("Activate web scraper for weather data.");
+	        
+	        // Select the rows containing weather data from the document
 	        Elements rows = weatherDoc.select("table.data tbody tr");
 	        String condition;
 	        String value;
+	        // Iterate through the rows and extract condition-value pairs
             for (Element row : rows) {
                 condition = row.select(".table_caption").text();
                 value = row.select(".table_value").text();
@@ -235,25 +259,33 @@ public class Korbielow {
             }
 	        
 	    } catch (IOException e) {
-	        System.err.println("Error while fetching weather data: " + e.getMessage());
+	        // Handle IOException by logging the error, printing the stack trace, and re-throwing the exception
+	        logger.error("Error while fetching weather data: " + e.getMessage());
 	        e.printStackTrace();
 	        throw e;
 	    }
 	}
 
+	/**
+	 * Scrapes ski runs data from the specified URL using Jsoup.
+	 * Parses the HTML document to extract information about each ski run,
+	 * @throws IOException if an error occurs while fetching or parsing the data.
+	 */
 	private void skiWebScrapper() throws IOException {
         try {
+            // Connect to the ski runs URL and fetch the document
             final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).get();
             System.out.println("Activate web scrapper for ski runs data.");
-
+            // Select the rows containing ski runs data from the document
             Elements rows = skiRunsDoc.select("table.tg tbody tr");
             for (Element row : rows) {
                 Elements cells = row.select("td");
 
-                // Skip header row
+                // Skip header row and consider only rows with sufficient cells
                 if (cells.size() >=6 ) {
                     String status = cells.get(0).select("img").attr("src");
-
+                    
+                    // Proceed only if the status is not empty
                     if (!status.isEmpty()) {
                         String name = cells.get(1).text();
                         String conditions = cells.get(2).select("img").attr("src");
@@ -261,12 +293,13 @@ public class Korbielow {
                         String length = cells.get(4).text();
                         String elevationDifference = cells.get(5).text();
                         
+                        // Adjust ski run name if it contains parentheses
                         if (name.contains("(")) {
                             int index = name.indexOf("(");
                             name = name.substring(0, index);
                         }
-
                         
+                        //add ski run informations to skiRunsArrayList
                         skiRunsArrayList.add(new String[] {
                         		status,
     							name,
@@ -276,6 +309,7 @@ public class Korbielow {
     							elevationDifference
     					});
                         
+                        // Log details of each ski run
                         logger.debug("Status: {}", status);
                         logger.debug("Name and Difficulty: {}", name);
                         logger.debug("Conditions: {}", conditions);
@@ -287,28 +321,37 @@ public class Korbielow {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error while fetching ski runs data: " + e.getMessage());
+            logger.error("Error while fetching ski runs data: " + e.getMessage());
             e.printStackTrace();
             throw e;
         }
     }
 	
+	/**
+	 * Scrapes ski lifts data from the specified URL using Jsoup.
+	 * Parses the HTML document to extract information about each ski lift,
+	 * @throws IOException if an error occurs while fetching or parsing the data.
+	 */
 	private void skiLiftsWebScrapper() throws IOException {
 	    try {
+	        // Connect to the URL and fetch the document
 	        final Document skiLiftsDoc = Jsoup.connect(skiRunsUrl).get();
 	        System.out.println("Activate web scrapper for ski lifts data.");
-
+	        
+	        // Select the rows containing ski lifts data from the document
 	        Elements rows = skiLiftsDoc.select("table.tg tbody tr");
 	        for (Element row : rows) {
 	            Elements cells = row.select("td");
 
 	            if (cells.size() == 3) {
 	                String status = cells.get(0).select("img").attr("src");
-
+	                
+	                // Proceed only if the status is not empty
 	                if (!status.isEmpty()) {
 	                    String liftName = cells.get(1).text();
 	                    String liftType = cells.get(2).text();
-
+	                    
+	                    // add ski lift information to skiLiftsArrayList
 	                    skiLiftsArrayList.add(new String[]{
 	                            status,
 	                            liftName,
@@ -323,12 +366,16 @@ public class Korbielow {
 	            }
 	        }
 	    } catch (IOException e) {
-	        System.err.println("Error while fetching ski lifts data: " + e.getMessage());
+	        // Handle IOException by logging the error, printing the stack trace, and re-throwing the exception
+	        logger.error("Error while fetching ski lifts data: " + e.getMessage());
 	        e.printStackTrace();
 	        throw e;
 	    }
 	}
 	
+	/**
+     * Displays a dialog with information about ski lifts, including status, name, and type.
+     */
 	private void showLiftsDataDialog() {
         logger.info("Activate showLiftsDataDialog() method.");
 
@@ -358,6 +405,9 @@ public class Korbielow {
 	    JOptionPane.showMessageDialog(null, scrollPane, "Dane o wyciągach narciarskich", JOptionPane.PLAIN_MESSAGE);
 	}
 
+	/**
+     * Displays a bar chart showing the lengths of ski runs.
+     */
 	private void showSkiRunsChart() {
         logger.info("Activate showSkiRunsChart() method.");
 

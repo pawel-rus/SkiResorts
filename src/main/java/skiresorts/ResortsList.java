@@ -2,7 +2,6 @@ package main.java.skiresorts;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-//import org.apache.logging.log4j.*;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -15,9 +14,11 @@ import java.awt.event.ActionListener;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
+/**
+ * Main class representing the Ski Resorts application.
+ */
 public class ResortsList implements ActionListener {
     private static Logger logger = LogManager.getLogger(ResortsList.class);
 
@@ -29,7 +30,10 @@ public class ResortsList implements ActionListener {
 	JButton[] buttons = new JButton[resorts.length];
 	Color myColor = new Color(255,255,204);
 	Boolean connection;
-	
+	 /**
+     * Constructor for the ResortsList class.
+     * Initializes the main frame and sets up the GUI components.
+     */
 	ResortsList(){
 		initFrame();
 		initTitlePanel();
@@ -42,6 +46,9 @@ public class ResortsList implements ActionListener {
 		connection = new InternetConnectionChecker().isInternetAvailable();
 	}
 	
+	/**
+     * Initializes the main frame of the application.
+     */
 	private void initFrame() {
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		//mainFrame.setSize(600,600);
@@ -50,12 +57,15 @@ public class ResortsList implements ActionListener {
 		//mainFrame.setLocationRelativeTo(null);
 		
 	}
+	
+	/**
+     * Initializes the title panel of the application.
+     */
 	private void initTitlePanel(){
 		titlePanel.setLayout(new BorderLayout());
 		//titlePanel.setBounds(0,0,600,80);
 		
 		nameField.setBackground(myColor);
-		//nameField.setForeground(new Color(25,255,0));
 		nameField.setFont(new Font("Helvetica",Font.BOLD,60));
 		nameField.setHorizontalAlignment(JLabel.CENTER);
 		nameField.setText("Ski Resorts App");
@@ -65,9 +75,11 @@ public class ResortsList implements ActionListener {
 		mainFrame.add(titlePanel, BorderLayout.NORTH);
 	}
 	
+	/**
+     * Initializes the list panel displaying ski resorts.
+     */
 	private void initListPanel() {
         listPanel.setLayout(new GridLayout(resorts.length,1));
-		//listPanel.setBounds(0,80,600,520);
 		listPanel.setBackground(myColor);
 		
 		//initialize buttons
@@ -84,7 +96,7 @@ public class ResortsList implements ActionListener {
 			buttons[i].addMouseListener(new java.awt.event.MouseAdapter() {
 				@Override
 		        public void mouseEntered(java.awt.event.MouseEvent evt) {
-		            buttons[finalI].setBackground(new Color(173, 216, 230)); // Zmiana koloru po najechaniu myszą
+		            buttons[finalI].setBackground(new Color(173, 216, 230)); // change color
 		        }
 				@Override
 		        public void mouseExited(java.awt.event.MouseEvent evt) {
@@ -95,7 +107,10 @@ public class ResortsList implements ActionListener {
 		
 		mainFrame.add(listPanel, BorderLayout.CENTER);
 	}
-	@Override
+	/**
+	 * @Override
+     * Handles button click events and performs actions based on the selected resort.
+     */
 	public void actionPerformed(ActionEvent e) {
 		if(!connection) {
 			logger.fatal("No internet connection, it isn't possible to display informations about ski resorts.");
@@ -129,11 +144,4 @@ public class ResortsList implements ActionListener {
 			}
 		}
 	}
-	
-	
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-
-	}
-
 }
