@@ -10,12 +10,12 @@ import java.awt.Font;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 public class ResortsList implements ActionListener {
@@ -25,7 +25,7 @@ public class ResortsList implements ActionListener {
 	private JPanel titlePanel  = new JPanel();
 	private JPanel listPanel  = new JPanel();
 	private JLabel nameField = new JLabel();
-    private String[] resorts = {"Szczyrk Mountain Resort", "Kotelnica Białczańska", "Korbielów"};
+    private String[] resorts = {"Kotelnica Białczańska", "Korbielów"};
 	JButton[] buttons = new JButton[resorts.length];
 	Color myColor = new Color(255,255,204);
 	Boolean connection;
@@ -66,7 +66,7 @@ public class ResortsList implements ActionListener {
 	}
 	
 	private void initListPanel() {
-        listPanel.setLayout(new GridLayout(3,1));
+        listPanel.setLayout(new GridLayout(resorts.length,1));
 		//listPanel.setBounds(0,80,600,520);
 		listPanel.setBackground(myColor);
 		
@@ -99,30 +99,34 @@ public class ResortsList implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 		if(!connection) {
 			logger.fatal("No internet connection, it isn't possible to display informations about ski resorts.");
-			System.exit(1);
-		}
-		int index = 0;
-		for (int i = 0; i < buttons.length; i++) {
-            if (e.getSource() == buttons[i]) {
-                index = i;
-                break;
-            }
-        }
-		switch(index) {
-			case 0:
-				logger.info("Opening Szczyrk Details.");
-				new Szczyrk();
-				break;
-			case 1:
-				logger.info("Opening Kotelnica Details.");
-				new Kotelnica();
-				break;
-			case 2:
-				logger.info("Opening Korbielów Details.");
-				new Korbielow();
-				break;
-			default:
-				break;
+			ErrorHandler connectionHandler = new ErrorHandler();
+			connectionHandler.handleConnectionError();
+			connection = new InternetConnectionChecker().isInternetAvailable();
+			logger.error("Method handleConnectionError() called.");
+		}else {
+			int index = 0;
+			for (int i = 0; i < buttons.length; i++) {
+	            if (e.getSource() == buttons[i]) {
+	                index = i;
+	                break;
+	            }
+	        }
+			switch(index) {
+				case 0:
+					logger.info("Opening Kotelnica Details.");
+					new Kotelnica();
+					break;
+				case 1:
+					logger.info("Opening Korbielów Details.");
+					new Korbielow();
+					break;
+				case 2:
+					logger.info("Opening Resort3 Details.");
+					new Szczyrk();
+					break;
+				default:
+					break;
+			}
 		}
 	}
 	

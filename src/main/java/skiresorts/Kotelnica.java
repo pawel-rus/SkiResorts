@@ -39,10 +39,12 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
+import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -473,8 +475,11 @@ public class Kotelnica {
 			}
 		} catch (IOException e){
 			logger.error("Error while fetching weather data: {}", e.getMessage());
-			//e.printStackTrace();
-			System.exit(1);
+			e.printStackTrace();
+			//System.exit(1);
+			ErrorHandler webScrapperError = new ErrorHandler();
+	        webScrapperError.handleWebScrapperError(frame);
+	        logger.error("Method handleWebScrapperError() called.");
 		}
 		
 		
@@ -511,9 +516,12 @@ public class Kotelnica {
 		}catch(IOException e) {
 			logger.error("Error while fetching ski runs data: {}", e.getMessage());
 			e.printStackTrace();
-			System.exit(1);
+			ErrorHandler webScrapperError = new ErrorHandler();
+	        webScrapperError.handleWebScrapperError(frame);
+	        logger.error("Method handleWebScrapperError() called.");
+			//System.exit(1);
 		}
-		logger.info("Ski Runs Data: ");
+		logger.info("Ski Runs Data Scrapped succesfully.");
 		for(String[] array : skiRunsArrayList) {
 			for(String elem : array) {
 				System.out.print(elem + " ");

@@ -25,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -208,15 +209,18 @@ public class Korbielow {
 	        weatherDataFuture.get();
 	        skiRunsFuture.get();
 	        skiLiftsFuture.get();
+	        logger.info("Scrapping all data finished.");
 	    } catch (InterruptedException | ExecutionException e) {
 	        logger.error("Error while fetching data: " + e.getMessage());
+	        ErrorHandler webScrapperError = new ErrorHandler();
+	        webScrapperError.handleWebScrapperError(frame);
+	        logger.error("Method handleWebScrapperError() called.");
+
 	        e.printStackTrace();
-	    } finally {
-	        logger.info("Scrapping all data finished.");
-	    }
+	    } 
 	}
 
-	private void scrapeWeatherData() {
+	private void scrapeWeatherData() throws IOException {
 	    try {
 	        final Document weatherDoc = Jsoup.connect(weatherUrl).get();
 	        logger.info("Activate web scraper for weather data.");
@@ -233,11 +237,11 @@ public class Korbielow {
 	    } catch (IOException e) {
 	        System.err.println("Error while fetching weather data: " + e.getMessage());
 	        e.printStackTrace();
-	        System.exit(1);
+	        throw e;
 	    }
 	}
 
-	private void skiWebScrapper() {
+	private void skiWebScrapper() throws IOException {
         try {
             final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).get();
             System.out.println("Activate web scrapper for ski runs data.");
@@ -285,11 +289,11 @@ public class Korbielow {
         } catch (IOException e) {
             System.err.println("Error while fetching ski runs data: " + e.getMessage());
             e.printStackTrace();
-            System.exit(1);
+            throw e;
         }
     }
 	
-	private void skiLiftsWebScrapper() {
+	private void skiLiftsWebScrapper() throws IOException {
 	    try {
 	        final Document skiLiftsDoc = Jsoup.connect(skiRunsUrl).get();
 	        System.out.println("Activate web scrapper for ski lifts data.");
@@ -321,7 +325,7 @@ public class Korbielow {
 	    } catch (IOException e) {
 	        System.err.println("Error while fetching ski lifts data: " + e.getMessage());
 	        e.printStackTrace();
-	        System.exit(1);
+	        throw e;
 	    }
 	}
 	
