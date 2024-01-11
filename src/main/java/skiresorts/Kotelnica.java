@@ -24,6 +24,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
 import java.awt.GridLayout;
+import java.awt.MediaTracker;
 import java.awt.Paint;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,6 +64,7 @@ public class Kotelnica {
 	private JPanel bottomPanel = new JPanel();
     // JTable for displaying ski runs information
 	private JTable rightTable;
+	private Color myColor = new Color(255, 255, 255);
 	// HashMap to store weather conditions and their values
 	private HashMap<String, String> weatherDataMap = new LinkedHashMap<>();
 	List<String[]> skiRunsArrayList = new ArrayList<>();
@@ -94,11 +96,8 @@ public class Kotelnica {
      */
 	void initFrame() {
 		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		//frame.getContentPane().setBackground(new Color(255,255,204));
-		frame.getContentPane().setBackground(new Color(255,255,255));
-
+		frame.getContentPane().setBackground(myColor);
 		frame.setLayout(new BorderLayout());
-		
 	}
 	
 	/**
@@ -108,9 +107,9 @@ public class Kotelnica {
 		webScrapper();
 		
 		mainPanel.setLayout(new BorderLayout());
-		mainPanel.setBackground(new Color(255,255,255));
+		mainPanel.setBackground(myColor);
 		JPanel leftColumn = new JPanel(new GridLayout(weatherDataMap.size() + 1, 2));
-		leftColumn.setBackground(new Color(255,255,255));
+		leftColumn.setBackground(myColor);
 		//JPanel rightColumn = new JPanel(new GridLayout(skiRunsArrayList.size() + 1,skiRunsArrayList.get(0).length));
 		
 		leftColumn.add(new JLabel("WARUNKI POGODOWE"));
@@ -121,12 +120,11 @@ public class Kotelnica {
 			
 			JLabel conditionLabel = new JLabel(condition);
 			JLabel valueLabel = new JLabel(value);
-			conditionLabel.setBackground(new Color(255,255,255));
-			valueLabel.setBackground(new Color(255,255,255));
+			conditionLabel.setBackground(myColor);
+			valueLabel.setBackground(myColor);
 			leftColumn.add(conditionLabel);
 			leftColumn.add(valueLabel);
 		}
-		
 		
 		String[][] rightTableData = skiRunsArrayList.toArray(new String[skiRunsArrayList.size()][]);
 		String[] columnNames = {"Trasa", "Trudność", "Czynna", "Pokrywa śnieżna", "Długość", "Naśnieżanie", "Oświetlenie"};
@@ -150,12 +148,10 @@ public class Kotelnica {
 		columnModel.getColumn(5).setPreferredWidth(100);
 		columnModel.getColumn(6).setPreferredWidth(100);
 		rightTable.setPreferredScrollableViewportSize(new Dimension(620, 310)); 
-
-
 		
 		//rightTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 		JScrollPane scrollPane = new JScrollPane(rightTable);
-		scrollPane.setBackground(new Color(255,255,255));
+		scrollPane.setBackground(myColor);
 	    /*
 		for(String[] array : skiRunsArrayList) {
 			for(String elem : array) {
@@ -164,13 +160,10 @@ public class Kotelnica {
 		}
 		*/
 		
-		
 		mainPanel.add(leftColumn, BorderLayout.WEST);
 		mainPanel.add(scrollPane, BorderLayout.EAST);
 		
 		frame.add(mainPanel, BorderLayout.CENTER);
-	
-	
 	}
 	
 	/**
@@ -183,10 +176,13 @@ public class Kotelnica {
 		try {
 			JLabel imageLabel = new JLabel();
 			ImageIcon icon = new ImageIcon("resources/kotelnica.png");
+			if (icon.getImageLoadStatus() == MediaTracker.ERRORED) {
+		        throw new IOException("Can't find this file.");
+		    }
 			imageLabel.setIcon(icon);
 			logoPanel.add(imageLabel);
 		}catch (Exception e) {
-			logger.error(e.getMessage());
+			logger.error("Error while loading logo: {} ", e.getMessage());
 			
 			JLabel nameField = new JLabel();
 			nameField.setBackground(new Color(255,255,204));
@@ -211,7 +207,7 @@ public class Kotelnica {
 		barChart.addActionListener(e -> showBarChart());
 		
 		bottomPanel.setLayout(new GridLayout(1,2));
-        bottomPanel.setBackground(new Color(255,255,255));
+        bottomPanel.setBackground(myColor);
 	    bottomPanel.add(pieChart);
 		bottomPanel.add(barChart);
 		
@@ -223,6 +219,8 @@ public class Kotelnica {
 	 * Displays a pie chart showing the distribution of ski runs by difficulty level.
 	 */
 	private void showPieChart() {
+		logger.info("Activate showPieChart() method.");
+
         int hard = 0, easy = 0, veryEasy = 0, other = 0;
         for (String difficulty : difficultyLevel) {
             if (difficulty.equals("trudna")) {
@@ -258,7 +256,7 @@ public class Kotelnica {
         
         // Create a chart panel for displaying the pie chart
         ChartPanel chartPanel = new ChartPanel(pieChart);
-        chartPanel.setBackground(new Color(255, 255, 255));
+        chartPanel.setBackground(myColor);
         // Display the pie chart in a dialog box
         JOptionPane.showMessageDialog(null, chartPanel, "Wykres kołowy", JOptionPane.PLAIN_MESSAGE);
     }
@@ -267,6 +265,7 @@ public class Kotelnica {
 	 * Displays a bar chart showing the lengths of ski runs based on difficulty level.
 	 */
 	private void showBarChart() {
+		logger.info("Activate showBarChart() method.");
         JFreeChart barChart = ChartFactory.createBarChart(
                 "Długość tras narciarskich",
                 "Trasa",
@@ -280,7 +279,7 @@ public class Kotelnica {
         
         // Create a chart panel for displaying the bar chart
         ChartPanel barChartPanel = new ChartPanel(barChart);
-        barChartPanel.setBackground(new Color(255, 255, 255));
+        barChartPanel.setBackground(myColor);
 
         // Access the category plot for customizing
         CategoryPlot categoryPlot = barChart.getCategoryPlot();
@@ -340,7 +339,7 @@ public class Kotelnica {
 	void webScrapper() {
         // Code for scraping weather data
 		try {
-			final Document document = Jsoup.connect(conditionsUrl).get();
+			final Document document = Jsoup.connect(conditionsUrl).timeout(4000).get();
 			logger.info("Activate web scrapper for weather data.");
 			String condition;
 			String value;
@@ -362,7 +361,6 @@ public class Kotelnica {
 		} catch (IOException e){
 			logger.error("Error while fetching weather data: {}", e.getMessage());
 			e.printStackTrace();
-			//System.exit(1);
 			ErrorHandler webScrapperError = new ErrorHandler();
 	        webScrapperError.handleWebScrapperError(frame);
 	        logger.error("Method handleWebScrapperError() called.");
@@ -370,7 +368,7 @@ public class Kotelnica {
 		
         // Code for scraping ski runs data
 		try {
-			final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).get();
+			final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).timeout(4000).get();
 			logger.info("Activate web scrapper for ski runs data.");
 			
 			for(Element row : skiRunsDoc.select("table tr")) {
@@ -405,7 +403,6 @@ public class Kotelnica {
 			ErrorHandler webScrapperError = new ErrorHandler();
 	        webScrapperError.handleWebScrapperError(frame);
 	        logger.error("Method handleWebScrapperError() called.");
-			//System.exit(1);
 		}
 		logger.info("Ski Runs Data Scrapped succesfully.");
 		for(String[] array : skiRunsArrayList) {

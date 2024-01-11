@@ -14,6 +14,7 @@ public class ErrorHandler {
 	 * @param frame Reference to the current JFrame to be closed.
 	 */
 	public void handleWebScrapperError(JFrame frame) {
+		
 		int option = JOptionPane.showConfirmDialog(null,
 				"Error while fetching web data.\n"
 				+ "Do you want to close the current window?",

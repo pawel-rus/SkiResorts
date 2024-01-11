@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.Insets;
 import java.awt.MediaTracker;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +53,6 @@ public class Korbielow {
     private JFrame frame = new JFrame("Korbielów");
 	private JPanel logoPanel  = new JPanel();
 	private JPanel mainPanel  = new JPanel();
-	
 	
 	private Color myColor = new Color(255, 255, 255);
 	private HashMap<String, String> weatherDataMap = new LinkedHashMap<>();
@@ -157,13 +157,23 @@ public class Korbielow {
 	            if (col == 0 || col == 2) {
 	                int index = array[col].lastIndexOf("/");
 	                String fileName = array[col].substring(index + 1);
-	                try {
-	                    ImageIcon icon = new ImageIcon("resources/" + fileName);
-	                    label = new JLabel(icon);
-	                } catch (Exception e) {
-	                    logger.error(e.getMessage());
-	                    label = new JLabel("error");
+	                String filePath = "resources/" + fileName;
+	                File file = new File(filePath);
+	                if(file.exists()) {
+		                try {
+		                    ImageIcon icon = new ImageIcon(filePath);
+		                    label = new JLabel(icon);
+		                } catch (Exception e) {
+		                    logger.error("IOException while loading image: {}", e.getMessage());
+		                    label = new JLabel("error");
+		                }	
+	                }else {
+	                    logger.error("File doesn't exist: {}", filePath);
+	                    index = fileName.lastIndexOf(".");
+	                    fileName = fileName.substring(0, index);
+	                    label = new JLabel(fileName);
 	                }
+	                
 	            } else {
 	                label = new JLabel(array[col]);
 	                if(col != 1) label.setHorizontalAlignment(JLabel.CENTER);
@@ -243,7 +253,7 @@ public class Korbielow {
 	private void scrapeWeatherData() throws IOException {
 	    try {
 	        // Connect to the weather URL and fetch the document
-	        final Document weatherDoc = Jsoup.connect(weatherUrl).get();
+	        final Document weatherDoc = Jsoup.connect(weatherUrl).timeout(4000).get();
 	        logger.info("Activate web scraper for weather data.");
 	        
 	        // Select the rows containing weather data from the document
@@ -274,7 +284,7 @@ public class Korbielow {
 	private void skiWebScrapper() throws IOException {
         try {
             // Connect to the ski runs URL and fetch the document
-            final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).get();
+            final Document skiRunsDoc = Jsoup.connect(skiRunsUrl).timeout(4000).get();
             System.out.println("Activate web scrapper for ski runs data.");
             // Select the rows containing ski runs data from the document
             Elements rows = skiRunsDoc.select("table.tg tbody tr");
@@ -335,7 +345,7 @@ public class Korbielow {
 	private void skiLiftsWebScrapper() throws IOException {
 	    try {
 	        // Connect to the URL and fetch the document
-	        final Document skiLiftsDoc = Jsoup.connect(skiRunsUrl).get();
+	        final Document skiLiftsDoc = Jsoup.connect(skiRunsUrl).timeout(4000).get();
 	        System.out.println("Activate web scrapper for ski lifts data.");
 	        
 	        // Select the rows containing ski lifts data from the document
@@ -383,11 +393,27 @@ public class Korbielow {
 	    panel.setLayout(new GridLayout(0, 1));
 
 	    for (String[] liftData : skiLiftsArrayList) {
-	        
+	    	JLabel statusImageLabel;
 	        int index = liftData[0].lastIndexOf("/");
 	        String fileName = liftData[0].substring(index + 1);
-	        ImageIcon statusIcon = new ImageIcon("resources/" + fileName);
-	        JLabel statusImageLabel = new JLabel(statusIcon);
+            String filePath = "resources/" + fileName;
+            File file = new File(filePath);
+            //checking if img exist
+            if(file.exists()) {
+                try {
+                    ImageIcon statusIcon = new ImageIcon(filePath);
+                    statusImageLabel = new JLabel(statusIcon);
+                } catch (Exception e) {
+                    logger.error("IOException while loading image: {}", e.getMessage());
+                    statusImageLabel = new JLabel(fileName);
+                }	
+            }else {
+                logger.error("File doesn't exist: {}", filePath);
+                index = fileName.lastIndexOf(".");
+                fileName = fileName.substring(0, index);
+                statusImageLabel = new JLabel(fileName);
+                statusImageLabel.setHorizontalAlignment(JLabel.CENTER);
+            }
 	        panel.add(statusImageLabel);
 	        
 	        JLabel liftNameValueLabel = new JLabel(liftData[1]);
@@ -435,7 +461,4 @@ public class Korbielow {
         JOptionPane.showMessageDialog(null, chartPanel, "Wykres", JOptionPane.PLAIN_MESSAGE);
     }
 	
-	
-	
 }
-

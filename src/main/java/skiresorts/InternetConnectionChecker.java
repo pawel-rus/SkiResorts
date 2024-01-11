@@ -24,9 +24,9 @@ public class InternetConnectionChecker {
      * @return true if the internet is available, false otherwise.
      */
     public boolean isInternetAvailable() {
+    	logger.info("Checking Internet connectivity.");
         try {
             InetAddress inetAddress = InetAddress.getByName("www.google.com");
-            logger.info("Internet connection is available.");
             return inetAddress.isReachable(5000); // Timeout 5s
         } catch (Exception e) {
             logger.error("An error occurred while checking internet availability: " + e.getMessage());

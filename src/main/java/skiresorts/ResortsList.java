@@ -29,7 +29,8 @@ public class ResortsList implements ActionListener {
     private String[] resorts = {"Kotelnica Białczańska", "Korbielów"};
 	JButton[] buttons = new JButton[resorts.length];
 	Color myColor = new Color(255,255,204);
-	Boolean connection;
+	InternetConnectionChecker connection = new InternetConnectionChecker();
+	Boolean currentConnection;
 	 /**
      * Constructor for the ResortsList class.
      * Initializes the main frame and sets up the GUI components.
@@ -43,7 +44,8 @@ public class ResortsList implements ActionListener {
 		mainFrame.setLocationRelativeTo(null);
 		mainFrame.setVisible(true);
 		logger.info("ResortsList initialized.");
-		connection = new InternetConnectionChecker().isInternetAvailable();
+		currentConnection = connection.isInternetAvailable();
+		logger.trace("Connection value: {}", currentConnection);
 	}
 	
 	/**
@@ -112,12 +114,13 @@ public class ResortsList implements ActionListener {
      * Handles button click events and performs actions based on the selected resort.
      */
 	public void actionPerformed(ActionEvent e) {
-		if(!connection) {
-			logger.fatal("No internet connection, it isn't possible to display informations about ski resorts.");
+		currentConnection = connection.isInternetAvailable();
+		logger.trace("Connection value: {}", currentConnection);
+		if(!currentConnection) {
+			logger.error("No internet connection, it isn't possible to display informations about ski resorts.");
 			ErrorHandler connectionHandler = new ErrorHandler();
 			connectionHandler.handleConnectionError();
-			connection = new InternetConnectionChecker().isInternetAvailable();
-			logger.error("Method handleConnectionError() called.");
+			logger.info("Method handleConnectionError() called.");
 		}else {
 			int index = 0;
 			for (int i = 0; i < buttons.length; i++) {
