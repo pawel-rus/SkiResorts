@@ -126,8 +126,9 @@
 	
 	<Loggers>
 		
-		<Logger name="main.java.skiresorts.ResortsList" level="info" additivity="false">
+		<Logger name="main.java.skiresorts.ResortsList" level="trace" additivity="false">
 			<AppenderRef ref="ResortsListLog" />
+			<AppenderRef ref="TraceLog" />
 			<AppenderRef ref="InfoLog" />
 			<AppenderRef ref="WarnLog" />
 			<AppenderRef ref="ErrorLog" />
