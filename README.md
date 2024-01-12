@@ -38,29 +38,92 @@ Handles button click events and performs actions based on the selected resort.
 
 ### 2. `Korbielow.java`
 
-- The Korbielow class represents a GUI application for displaying ski resort information, including weather data, ski runs, and ski lifts.
-- Initializes the GUI frame and components, fetching ski resort data, and displaying the information.
-- Uses Jsoup for web scraping to retrieve weather data, ski runs information, and ski lifts data from specific URLs.
-- Utilizes Swing components, including JFrame, JPanel, JLabel, and JButton, to create an interactive user interface.
-- Implements a multi-threaded approach using ExecutorService for concurrent fetching of weather data, ski runs, and ski lifts.
-- Displays ski resort data, including ski runs with information such as status, name, conditions, snow range, length, and elevation difference.
-- Presents ski lift data, including status, name, and type, through a dialog.
-- Generates a bar chart using JFreeChart to visualize the lengths of ski runs and displays it in a separate dialog.
-- Provides error handling for web scraping issues, logging errors using Log4j, and displaying appropriate error dialogs.
+## Overview
+
+- **Initialization:** Constructor initializes the GUI frame and components, fetches ski resort data, and displays the information.
+- **Web Scraping:** Utilizes Jsoup for web scraping to retrieve weather data, ski runs information, and ski lifts data from specific URLs.
+- **Swing Components:** Utilizes Swing components (JFrame, JPanel, JLabel, JButton) to create an interactive user interface.
+- **Concurrency:** Implements a multi-threaded approach using ExecutorService for concurrent fetching of weather data, ski runs, and ski lifts.
+- **Ski Runs Information:** Displays ski resort data, including ski runs with information such as status, name, conditions, snow range, length, and elevation difference.
+- **Ski Lift Information:** Presents ski lift data, including status, name, and type, through a dialog.
+- **Data Visualization:** Generates a bar chart using JFreeChart to visualize the lengths of ski runs and displays it in a separate dialog.
+- **Error Handling:** Provides error handling for web scraping issues, logs errors using Log4j, and displays appropriate error dialogs.
+
+## Methods
+
+### `Korbielow()`
+Constructor of the Korbielow class. Initializes the GUI frame and components, fetches ski resort data, and displays the information.
+
+### `initLogoPanel()`
+Initializes the logo panel, including the resort image or name and weather data.
+
+### `initMainPanel()`
+Initializes the main panel, including a table of ski runs and buttons for displaying ski lifts data and charts.
+
+### `scrapeAllData()`
+Fetches all data including weather data, ski runs, and ski lifts using multiple threads.
+
+### `scrapeWeatherData()`
+Scrapes weather data from the specified URL using Jsoup. Parses the HTML document to extract condition-value pairs.
+Throws IOException if an error occurs while fetching or parsing the data.
+
+### `skiWebScrapper()`
+Scrapes ski runs data from the specified URL using Jsoup. Parses the HTML document to extract information about each ski run.
+Throws IOException if an error occurs while fetching or parsing the data.
+
+### `skiLiftsWebScrapper()`
+Scrapes ski lifts data from the specified URL using Jsoup. Parses the HTML document to extract information about each ski lift.
+Throws IOException if an error occurs while fetching or parsing the data.
+
+### `showLiftsDataDialog()`
+Displays a dialog with information about ski lifts, including status, name, and type.
+
+### `showSkiRunsChart()`
+Displays a bar chart showing the lengths of ski runs.
 
 ### 3. `Kotelnica.java`
-- Represents a graphical user interface (GUI) application designed to present information about the ski resort.
-- Initializes the main frame, logo panel, main content panel, and additional control buttons at the bottom of the window.
-- Utilizes the Jsoup library for web scraping to gather essential data about weather conditions and ski runs from specific URLs.
-- Fetches data such as wind speed, temperature, ski run details (name, difficulty, status, ice sheet, length, etc.).
-- Implements Swing components, including JFrame, JPanel, JLabel, JButton, and JTable, to create an interactive and visually appealing user interface.
-- Implements a multi-threaded approach using ExecutorService to concurrently fetch weather data, ski runs information, and ski lifts data, ensuring efficiency in data retrieval.
-- Displays weather conditions on the left side of the GUI, including details like wind speed, temperature, and other relevant data.
-- Presents ski runs information on the right side using a JTable, offering details such as ski run name, difficulty level, status, ice sheet, length, snow conditions, and lighting status.
-- Generates a bar chart using JFreeChart to visually represent the lengths of ski runs based on their difficulty levels.
-- Presents the bar chart in a separate dialog for enhanced visualization of ski run lengths.
-- Incorporates error handling mechanisms to address potential issues during web scraping.
-- Utilizes Log4j for logging events, capturing errors, and providing comprehensive logs for debugging purposes.
+
+## Overview
+
+- **Initialization:** Constructor initializes the main frame, logo panel, main content panel, and additional control buttons at the bottom of the window.
+- **Web Scraping:** Utilizes the Jsoup library for web scraping to gather essential data about weather conditions and ski runs from specific URLs.
+- **Data Fetching:** Fetches data such as wind speed, temperature, ski run details (name, difficulty, status, ice sheet, length, etc.).
+- **Swing Components:** Implements Swing components (JFrame, JPanel, JLabel, JButton, JTable) to create an interactive and visually appealing user interface.
+- **Concurrency:** Implements a multi-threaded approach using ExecutorService to concurrently fetch weather data, ski runs information, and ski lifts data, ensuring efficiency in data retrieval.
+- **Weather Conditions Display:** Displays weather conditions on the left side of the GUI, including details like wind speed, temperature, and other relevant data.
+- **Ski Runs Information Display:** Presents ski runs information on the right side using a JTable, offering details such as ski run name, difficulty level, status, ice sheet, length, snow conditions, and lighting status.
+- **Data Visualization:** Generates a bar chart using JFreeChart to visually represent the lengths of ski runs based on their difficulty levels.
+- **Pie Chart Display:** Displays a pie chart showing the distribution of ski runs by difficulty level.
+- **Dialog Presentation:** Presents the bar chart in a separate dialog for enhanced visualization of ski run lengths.
+- **Error Handling:** Incorporates error handling mechanisms to address potential issues during web scraping.
+- **Logging:** Utilizes Log4j for logging events, capturing errors, and providing comprehensive logs for debugging purposes.
+
+## Methods
+
+### `Kotelnica()`
+Constructor for the Kotelnica class. Initializes the frame and sets up the GUI components.
+
+### `initFrame()`
+Initializes the main frame of the Kotelnica details window.
+
+### `initMainPanel()`
+Initializes the main content panel of the Kotelnica details window.
+
+### `initLogoPanel()`
+Initializes the panel for displaying the resort logo.
+
+### `initBottomPanel()`
+Initializes the panel for additional buttons at the bottom of the details window.
+
+### `showPieChart()`
+Displays a pie chart showing the distribution of ski runs by difficulty level.
+
+### `showBarChart()`
+Displays a bar chart showing the lengths of ski runs based on difficulty level.
+
+### `webScrapper()`
+Scrapes data from the web pages to populate weather and ski runs information.
+
 ### 4. `ErrorHandler.java`
 
 - Handles errors within the application, such as web scraping error and no internet connection error.
