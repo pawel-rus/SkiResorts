@@ -8,16 +8,33 @@ The project is organized into several classes in one package main.java.skiresort
 
 ### 1. `ResortsList.java`
 
-- Main class representing the Ski Resorts application.
-- Initializes the main frame and sets up the GUI components, including a title panel and a list panel displaying ski resorts.
-- Utilizes Swing components for the graphical user interface (GUI), such as JFrame, JLabel, and JButton.
-- Implements an ActionListener to handle button click events.
-- Performs internet connection checks using the InternetConnectionChecker class.
-- Utilizes Log4j for logging events and errors.
-- Displays a list of ski resorts as buttons, each triggering specific actions when clicked.
-- Dynamically adjusts button appearance with mouse hover effects.
-- Opens detailed information about the selected ski resort using other classes (e.g., Kotelnica, Korbielow).
-- Provides error handling for cases where there is no internet connection.
+## Overview
+
+- **Main Class:** Represents the Ski Resorts application.
+- **Initialization:** Initializes the main frame, GUI components (title panel and list panel), and utilizes Swing components (JFrame, JLabel, JButton).
+- **Event Handling:** Implements an ActionListener to manage button click events.
+- **Internet Connectivity:** Utilizes the InternetConnectionChecker class for performing internet connection checks.
+- **Logging:** Implements Log4j for logging events and errors.
+- **Dynamic UI:** Displays ski resorts as buttons with dynamic appearance adjustments on mouse hover.
+- **Detailed Information:** Opens detailed information about the selected ski resort using other classes (e.g., Kotelnica, Korbielow).
+- **Error Handling:** Provides error handling for scenarios with no internet connection.
+
+## Methods
+
+### `ResortsList()`
+Constructor for the ResortsList class. Initializes the main frame and sets up the GUI components.
+
+### `initFrame()`
+Initializes the main frame of the application.
+
+### `initTitlePanel()`
+Initializes the title panel of the application.
+
+### `initListPanel()`
+Initializes the list panel displaying ski resorts.
+
+### `actionPerformed(ActionEvent e)`
+Handles button click events and performs actions based on the selected resort.
 
 ### 2. `Korbielow.java`
 
